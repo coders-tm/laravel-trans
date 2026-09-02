@@ -1,6 +1,6 @@
 <?php
 
-use Nitro\Trans\Support\TranslationKeyExtractor;
+use Trans\Support\TranslationKeyExtractor;
 
 it('extracts keys from single-quoted PHP __ function', function () {
     $extractor = new TranslationKeyExtractor;

@@ -13,7 +13,7 @@ A complete Laravel translation toolchain — scan, export/import CSV, clean unus
 ## Installation
 
 ```bash
-composer require nitro/laravel-trans
+composer require coderstm/laravel-trans
 ```
 
 Publish the config:
@@ -99,24 +99,29 @@ Add custom HTML attributes to auto-translate:
 ### Auto-wrap (trans:make-translatable)
 
 **Blade files:**
+
 - `<p>Hello World</p>` → `<p>{{ __("Hello World") }}</p>`
 - `<input placeholder="Enter name">` → `<input placeholder="{{ __("Enter name") }}">`
 
 **Vue files:**
+
 - `<p>Hello World</p>` → `<p>{{ t("Hello World") }}</p>`
 - `<input placeholder="Enter name">` → `<input :placeholder="t('Enter name')">`
 - Auto-injects `import { useLang } from '@/composables/use-lang'`
 
 **JS/TS files:**
+
 - `{ label: 'Submit' }` → `{ label: t("Submit") }`
 
 **PHP files:**
+
 - `'error' => 'Invalid input.'` → `'error' => __('Invalid input.')`
 - `with('error', 'Oops')` → `with('error', __('Oops'))`
 
 ### Safety
 
 The command skips:
+
 - Validation rules and `$rules` arrays
 - `@if`, `@foreach`, and other Blade directives
 - `<script>`, `<style>` content

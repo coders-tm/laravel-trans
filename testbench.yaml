@@ -1,0 +1,22 @@
+laravel: "@testbench"
+
+providers:
+  - Trans\LaravelTransServiceProvider
+
+workbench:
+  install: true
+  discovers:
+    web: false
+    api: false
+    commands: true
+    components: false
+    factories: false
+    views: false
+  build:
+    - sync-skeleton
+  sync:
+    - from: ./config/trans.php
+      to: workbench/config/trans.php
+      reverse: true
+    - from: workbench/resources/lang
+      to: resources/lang

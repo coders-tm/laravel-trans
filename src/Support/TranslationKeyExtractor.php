@@ -1,6 +1,6 @@
 <?php
 
-namespace Nitro\Trans\Support;
+namespace Trans\Support;
 
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\Finder;

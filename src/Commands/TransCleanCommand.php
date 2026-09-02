@@ -1,10 +1,10 @@
 <?php
 
-namespace Nitro\Trans\Commands;
+namespace Trans\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Nitro\Trans\Support\TranslationKeyExtractor;
+use Trans\Support\TranslationKeyExtractor;
 
 class TransCleanCommand extends Command
 {

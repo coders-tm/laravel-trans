@@ -1,6 +1,6 @@
 <?php
 
-namespace Nitro\Trans\Tests\Helpers;
+namespace Trans\Tests\Helpers;
 
 class FileFactory
 {

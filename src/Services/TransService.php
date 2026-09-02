@@ -1,6 +1,6 @@
 <?php
 
-namespace Nitro\Trans\Services;
+namespace Trans\Services;
 
 use Illuminate\Support\Facades\File;
 
@@ -22,12 +22,12 @@ class TransService
     /** @var array<string, array> */
     private array $fileCache = [];
 
-    public function __construct(string $locale = 'en', string $fallbackLocale = 'en', ?string $langPath = null)
+    public function __construct(string $locale = 'en', string $fallbackLocale = 'en', ?string $langPath = null, ?string $storagePath = null)
     {
         $this->locale = $locale;
         $this->fallbackLocale = $fallbackLocale;
-        $this->langPath = $langPath ?? $this->defaultLangPath();
-        $this->storagePath = storage_path('lang');
+        $this->langPath = $langPath ?? config('trans.lang_path') ?? resource_path('lang');
+        $this->storagePath = $storagePath ?? config('trans.storage_path') ?? storage_path('lang');
         $this->load($locale);
     }
 
@@ -46,6 +46,14 @@ class TransService
     public function getLocale(): string
     {
         return $this->locale;
+    }
+
+    /**
+     * Get the lang path.
+     */
+    public function getLangPath(): string
+    {
+        return $this->langPath;
     }
 
     /**
@@ -239,17 +247,5 @@ class TransService
         sort($locales);
 
         return array_values(array_unique($locales));
-    }
-
-    /**
-     * Get the default language files path.
-     */
-    private function defaultLangPath(): string
-    {
-        if (defined('LARAVEL_START')) {
-            return base_path('resources'.DIRECTORY_SEPARATOR.'lang');
-        }
-
-        return dirname(__DIR__, 2).DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'lang';
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Nitro\Trans\Commands;
+namespace Trans\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;

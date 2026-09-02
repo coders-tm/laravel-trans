@@ -1,11 +1,11 @@
 <?php
 
-namespace Nitro\Trans;
+namespace Trans;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
-use Nitro\Trans\Services\TransService;
-use Nitro\Trans\Support\TranslationKeyExtractor;
+use Trans\Services\TransService;
+use Trans\Support\TranslationKeyExtractor;
 
 class LaravelTransServiceProvider extends ServiceProvider
 {
@@ -26,7 +26,9 @@ class LaravelTransServiceProvider extends ServiceProvider
         $this->app->singleton(TransService::class, function () {
             $service = new TransService(
                 config('trans.default_locale', 'en'),
-                config('app.fallback_locale', 'en')
+                config('app.fallback_locale', 'en'),
+                null,
+                config('trans.storage_path', storage_path('lang'))
             );
             $service->load($service->getLocale());
 
@@ -54,6 +56,6 @@ class LaravelTransServiceProvider extends ServiceProvider
             return "<?php echo __({$expression}); ?>";
         });
 
-        $this->loadJsonTranslationsFrom(storage_path('lang'));
+        $this->loadJsonTranslationsFrom(config('trans.lang_path') ?? resource_path('lang'));
     }
 }

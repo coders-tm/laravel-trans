@@ -1,12 +1,18 @@
 {
-    "name": "nitro/laravel-trans",
+    "name": "coderstm/laravel-trans",
     "description": "A complete Laravel translation toolchain — scan, export/import CSV, clean unused keys, and auto-wrap Blade/Vue/JS/PHP content with translation helpers.",
-    "keywords": ["laravel", "translation", "i18n", "localization", "translatable"],
+    "keywords": [
+        "laravel",
+        "translation",
+        "i18n",
+        "localization",
+        "translatable"
+    ],
     "license": "MIT",
     "authors": [
         {
-            "name": "NitroFIT",
-            "email": "hello@nitrofit.co.uk"
+            "name": "Dipak Sarkar",
+            "email": "hello@dipaksarkar.in"
         }
     ],
     "require": {
@@ -24,18 +30,24 @@
     },
     "autoload": {
         "psr-4": {
-            "Nitro\\Trans\\": "src/"
+            "Trans\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Nitro\\Trans\\Tests\\": "tests/"
+            "Trans\\Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/",
+            "App\\": "vendor/orchestra/testbench-core/laravel/app/",
+            "Database\\Factories\\": "vendor/orchestra/testbench-core/laravel/database/factories/",
+            "Database\\Seeders\\": "vendor/orchestra/testbench-core/laravel/database/seeders/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Nitro\\Trans\\LaravelTransServiceProvider"
+                "Trans\\LaravelTransServiceProvider"
             ]
         }
     },
@@ -44,6 +56,29 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
+    },
+    "scripts": {
+        "test": [
+            "@php vendor/bin/testbench package:test --ansi"
+        ],
+        "format": [
+            "@php vendor/bin/pint --ansi"
+        ],
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve --ansi"
+        ],
+        "lint": [
+            "@php vendor/bin/pint --ansi"
+        ]
     },
     "minimum-stability": "dev",
     "prefer-stable": true
