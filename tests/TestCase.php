@@ -64,7 +64,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function createLangFile(string $locale, array $translations): string
     {
-        $langPath = base_path("resources/lang");
+        $langPath = base_path('resources/lang');
         if (! file_exists($langPath)) {
             mkdir($langPath, 0755, true);
         }

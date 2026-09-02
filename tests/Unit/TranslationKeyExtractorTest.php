@@ -28,7 +28,7 @@ it('extracts keys from Blade {{ __() }} syntax', function () {
 
 it('extracts multiple keys from mixed content', function () {
     $extractor = new TranslationKeyExtractor;
-    $content = <<<PHP
+    $content = <<<'PHP'
     <?php
     echo __('First Key');
     echo __("Second Key");
@@ -93,7 +93,7 @@ it('normalizes placeholder format from {placeholder} to :placeholder', function 
 
 it('removes duplicate keys', function () {
     $extractor = new TranslationKeyExtractor;
-    $content = <<<PHP
+    $content = <<<'PHP'
     <?php
     echo __('Hello');
     echo __("Hello");

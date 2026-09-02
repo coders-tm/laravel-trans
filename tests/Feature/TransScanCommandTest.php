@@ -24,30 +24,6 @@ it('scans codebase and creates en.json with found keys', function () {
     expect(file_exists($bladeFile))->toBeTrue();
     expect(file_exists($jsFile))->toBeTrue();
 
-    // Debug: check config
-    dump('scan_dirs config:', config('trans.scan_dirs'));
-    dump('base_path:', base_path());
-
-    // Debug: manually extract keys
-    $extractor = app(\Nitro\Trans\Support\TranslationKeyExtractor::class);
-    $keys = $extractor->scan();
-    dump('extracted keys:', $keys);
-
-    // Debug: check what Finder finds
-    $finder = new \Symfony\Component\Finder\Finder;
-    $finder->files()
-        ->in($this->tempPath)
-        ->name(['*.php', '*.blade.php', '*.js', '*.ts', '*.vue']);
-    $foundFiles = [];
-    foreach ($finder as $file) {
-        $foundFiles[] = $file->getRealPath();
-    }
-    dump('finder found files:', $foundFiles);
-    dump('temp path exists:', file_exists($this->tempPath));
-    dump('temp path contents:', scandir($this->tempPath));
-
-    expect(true)->toBeTrue();
-
     $this->artisan('trans:scan')
         ->assertExitCode(0);
 
@@ -105,7 +81,7 @@ it('exports i18n file with --i18n option', function () {
     expect(file_exists($fullPath))->toBeTrue();
 
     $content = File::get($fullPath);
-    expect($content)->toContain("export default");
+    expect($content)->toContain('export default');
     expect($content)->toContain('{name}');
 
     // Cleanup

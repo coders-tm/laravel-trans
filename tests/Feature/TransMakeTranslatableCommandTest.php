@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\File;
-
 it('wraps plain text in Blade <p> tags with __()', function () {
     $file = $this->factory()->blade('test.blade.php', '<p>Hello World</p>');
 
@@ -147,7 +145,7 @@ VUE
         ->assertExitCode(0);
 
     $content = file_get_contents($file);
-    expect($content)->toContain("t(")->toContain("Enter name");
+    expect($content)->toContain('t(')->toContain('Enter name');
 });
 
 it('translates Vue tag attributes (label)', function () {
@@ -162,7 +160,7 @@ VUE
         ->assertExitCode(0);
 
     $content = file_get_contents($file);
-    expect($content)->toContain("t(")->toContain("Submit");
+    expect($content)->toContain('t(')->toContain('Submit');
 });
 
 it('does not translate inside <script> in Vue', function () {
@@ -292,7 +290,7 @@ it('processes .ts files - wraps title key with t()', function () {
 });
 
 it('does not wrap non-translatable JS/TS keys', function () {
-    $file = $this->factory()->js('test.js', "{ count: 5, enabled: true }");
+    $file = $this->factory()->js('test.js', '{ count: 5, enabled: true }');
 
     $this->artisan('trans:make-translatable', ['path' => $file])
         ->assertExitCode(0);
@@ -463,9 +461,9 @@ VUE
         ->assertExitCode(0);
 
     $content = file_get_contents($file);
-    expect($content)->toContain('t(')->toContain("Email");
-    expect($content)->toContain('t(')->toContain("Email Address");
-    expect($content)->toContain('t(')->toContain("We won");
+    expect($content)->toContain('t(')->toContain('Email');
+    expect($content)->toContain('t(')->toContain('Email Address');
+    expect($content)->toContain('t(')->toContain('We won');
 });
 
 it('handles multiple JS object keys in single file', function () {

@@ -430,6 +430,7 @@ class TransMakeTranslatableCommand extends Command
                     while ($i < $len && $content[$i] !== "\n" && $content[$i] !== "\r") {
                         $i++;
                     }
+
                     continue;
                 } elseif ($content[$i + 1] === '*') {
                     $i += 2;
@@ -437,6 +438,7 @@ class TransMakeTranslatableCommand extends Command
                         $i++;
                     }
                     $i += 2;
+
                     continue;
                 }
             }
@@ -447,6 +449,7 @@ class TransMakeTranslatableCommand extends Command
                 while ($i < $len) {
                     if ($content[$i] === '\\') {
                         $i += 2;
+
                         continue;
                     }
                     if ($content[$i] === $quote) {
@@ -488,6 +491,7 @@ class TransMakeTranslatableCommand extends Command
                     $inSingleLineComment = false;
                 }
                 $i++;
+
                 continue;
             }
 
@@ -498,6 +502,7 @@ class TransMakeTranslatableCommand extends Command
                 } else {
                     $i++;
                 }
+
                 continue;
             }
 
@@ -510,6 +515,7 @@ class TransMakeTranslatableCommand extends Command
                     }
                     $i++;
                 }
+
                 continue;
             }
 
@@ -522,6 +528,7 @@ class TransMakeTranslatableCommand extends Command
                     }
                     $i++;
                 }
+
                 continue;
             }
 
@@ -529,10 +536,12 @@ class TransMakeTranslatableCommand extends Command
                 if ($content[$i + 1] === '/') {
                     $inSingleLineComment = true;
                     $i += 2;
+
                     continue;
                 } elseif ($content[$i + 1] === '*') {
                     $inMultiLineComment = true;
                     $i += 2;
+
                     continue;
                 }
             }
@@ -558,6 +567,7 @@ class TransMakeTranslatableCommand extends Command
             $startParenthesis = strpos($content, '(', $pos);
             if ($startParenthesis === false || $startParenthesis > $pos + 10) {
                 $offset = $pos + 7;
+
                 continue;
             }
 
@@ -577,6 +587,7 @@ class TransMakeTranslatableCommand extends Command
                     while ($i < $len) {
                         if ($content[$i] === '\\') {
                             $i += 2;
+
                             continue;
                         }
                         if ($content[$i] === $quote) {
@@ -680,12 +691,14 @@ class TransMakeTranslatableCommand extends Command
         while (($pos = strpos($content, '@', $offset)) !== false) {
             if ($pos + 1 >= $len || ! preg_match('/^[a-zA-Z_]/', $content[$pos + 1])) {
                 $offset = $pos + 1;
+
                 continue;
             }
 
             preg_match('/^@[a-zA-Z0-9_]+/', substr($content, $pos), $nameMatches);
             if (empty($nameMatches)) {
                 $offset = $pos + 1;
+
                 continue;
             }
 
@@ -694,6 +707,7 @@ class TransMakeTranslatableCommand extends Command
 
             if ($pos > 0 && preg_match('/[a-zA-Z0-9_\.\-]/', $content[$pos - 1])) {
                 $offset = $pos + $nameLen;
+
                 continue;
             }
 
@@ -729,6 +743,7 @@ class TransMakeTranslatableCommand extends Command
                         while ($i < $len) {
                             if ($content[$i] === '\\') {
                                 $i += 2;
+
                                 continue;
                             }
                             if ($content[$i] === $quote) {
