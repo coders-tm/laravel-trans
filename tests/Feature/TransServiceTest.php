@@ -3,10 +3,9 @@
 use Illuminate\Support\Facades\File;
 use Trans\Services\TransService;
 
-$originalEnContent = file_get_contents(dirname(__DIR__, 2).'/workbench/resources/lang/en.json');
-
-afterEach(function () use ($originalEnContent) {
-    File::put(base_path('resources/lang/en.json'), $originalEnContent);
+afterEach(function () {
+    @unlink(base_path('resources/lang/en.json'));
+    @unlink(base_path('resources/lang/es.json'));
     @unlink(storage_path('lang/en.json'));
 });
 
@@ -31,22 +30,32 @@ it('changes locale via setLocale', function () {
 });
 
 it('retrieves a translation via get', function () {
-    $service = new TransService('en', 'en');
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        'Accept' => 'Accept',
+    ], JSON_PRETTY_PRINT));
 
+    $service = new TransService('en', 'en');
     $result = $service->get('Accept');
 
     expect($result)->toBe('Accept');
 });
 
 it('returns the key itself when translation not found', function () {
-    $service = new TransService('en', 'en');
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        'Accept' => 'Accept',
+    ], JSON_PRETTY_PRINT));
 
+    $service = new TransService('en', 'en');
     $result = $service->get('non.existent.key');
 
     expect($result)->toBe('non.existent.key');
 });
 
 it('checks key existence via has', function () {
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        'Accept' => 'Accept',
+    ], JSON_PRETTY_PRINT));
+
     $service = new TransService('en', 'en');
 
     expect($service->has('Accept'))->toBeTrue();
@@ -54,8 +63,12 @@ it('checks key existence via has', function () {
 });
 
 it('returns all translations via all', function () {
-    $service = new TransService('en', 'en');
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        'Accept' => 'Accept',
+        'Hello :name' => 'Hello :name',
+    ], JSON_PRETTY_PRINT));
 
+    $service = new TransService('en', 'en');
     $all = $service->all();
 
     expect($all)->toBeArray();
@@ -64,8 +77,11 @@ it('returns all translations via all', function () {
 });
 
 it('returns i18n format via i18n', function () {
-    $service = new TransService('en', 'en');
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        'Accept' => 'Accept',
+    ], JSON_PRETTY_PRINT));
 
+    $service = new TransService('en', 'en');
     $result = $service->i18n();
 
     expect($result)->toBeArray();
@@ -73,8 +89,11 @@ it('returns i18n format via i18n', function () {
 });
 
 it('converts :placeholder to {placeholder} in i18n', function () {
-    $service = new TransService('en', 'en');
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        'Hello :name' => 'Hello :name',
+    ], JSON_PRETTY_PRINT));
 
+    $service = new TransService('en', 'en');
     $i18n = $service->i18n();
 
     expect($i18n)->toHaveKey('Hello {name}');
@@ -83,8 +102,11 @@ it('converts :placeholder to {placeholder} in i18n', function () {
 });
 
 it('escapes @ for vue-i18n in i18n', function () {
-    $service = new TransService('en', 'en');
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        ':app_name © :year All Rights Reserved' => ':app_name © :year All Rights Reserved',
+    ], JSON_PRETTY_PRINT));
 
+    $service = new TransService('en', 'en');
     $result = $service->i18n();
 
     expect($result)->toHaveKey('{app_name} © {year} All Rights Reserved');
@@ -92,8 +114,15 @@ it('escapes @ for vue-i18n in i18n', function () {
 });
 
 it('discovers supported locales via locales', function () {
-    $service = new TransService('en', 'en');
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        'Accept' => 'Accept',
+    ], JSON_PRETTY_PRINT));
 
+    File::put(base_path('resources/lang/es.json'), json_encode([
+        'Accept' => 'Aceptar',
+    ], JSON_PRETTY_PRINT));
+
+    $service = new TransService('en', 'en');
     $locales = $service->locales();
 
     expect($locales)->toBeArray();
@@ -102,23 +131,27 @@ it('discovers supported locales via locales', function () {
 });
 
 it('falls back to en when locale file missing', function () {
-    $service = new TransService('fr', 'en');
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        'Accept' => 'Accept',
+    ], JSON_PRETTY_PRINT));
 
+    $service = new TransService('fr', 'en');
     $all = $service->all('fr');
 
-    // fr.json doesn't exist, so it should fall back to en.json
     expect($all)->toHaveKey('Accept');
 });
 
 it('stores translations via update', function () {
-    $service = new TransService('en', 'en');
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        'Accept' => 'Accept',
+    ], JSON_PRETTY_PRINT));
 
+    $service = new TransService('en', 'en');
     $result = $service->update('en', ['New Key' => 'New Value']);
 
     expect($result)->toHaveKey('New Key');
     expect($result['New Key'])->toBe('New Value');
 
-    // Verify it persisted to storage
     $storagePath = config('trans.storage_path', storage_path('lang')).'/en.json';
     expect(File::exists($storagePath))->toBeTrue();
     $stored = json_decode(File::get($storagePath), true);
@@ -126,12 +159,13 @@ it('stores translations via update', function () {
 });
 
 it('merges update with existing translations', function () {
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        'Accept' => 'Accept',
+    ], JSON_PRETTY_PRINT));
+
     $service = new TransService('en', 'en');
 
-    // First update
     $service->update('en', ['Key A' => 'Value A']);
-
-    // Second update - should merge, not replace
     $result = $service->update('en', ['Key B' => 'Value B']);
 
     expect($result)->toHaveKey('Key A');
@@ -141,6 +175,10 @@ it('merges update with existing translations', function () {
 });
 
 it('filters null values in update', function () {
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        'Accept' => 'Accept',
+    ], JSON_PRETTY_PRINT));
+
     $service = new TransService('en', 'en');
 
     $result = $service->update('en', [
@@ -153,6 +191,10 @@ it('filters null values in update', function () {
 });
 
 it('reloads translations after update', function () {
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        'Accept' => 'Accept',
+    ], JSON_PRETTY_PRINT));
+
     $service = new TransService('en', 'en');
 
     expect($service->has('Fresh Key'))->toBeFalse();
@@ -163,6 +205,10 @@ it('reloads translations after update', function () {
 });
 
 it('sorts keys alphabetically after update', function () {
+    File::put(base_path('resources/lang/en.json'), json_encode([
+        'Accept' => 'Accept',
+    ], JSON_PRETTY_PRINT));
+
     $service = new TransService('en', 'en');
 
     $result = $service->update('en', [
@@ -173,7 +219,6 @@ it('sorts keys alphabetically after update', function () {
 
     $keys = array_keys($result);
     expect($keys)->toBe([...$keys]);
-    // Verify Alpha comes before Zebra
     $alphaIndex = array_search('Alpha', $keys);
     $zebraIndex = array_search('Zebra', $keys);
     expect($alphaIndex)->toBeLessThan($zebraIndex);

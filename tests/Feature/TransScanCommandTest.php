@@ -2,13 +2,10 @@
 
 use Illuminate\Support\Facades\File;
 
-$originalEnContent = file_get_contents(dirname(__DIR__, 2).'/workbench/resources/lang/en.json');
-$originalEsContent = file_get_contents(dirname(__DIR__, 2).'/workbench/resources/lang/es.json');
-
-afterEach(function () use ($originalEnContent, $originalEsContent) {
-    File::put(base_path('resources/lang/en.json'), $originalEnContent);
-    File::put(base_path('resources/lang/es.json'), $originalEsContent);
+afterEach(function () {
+    @unlink(base_path('resources/lang/en.json'));
     @unlink(base_path('resources/lang/translations.csv'));
+    @unlink(base_path('resources/js/i18n/en.js'));
 });
 
 it('scans codebase and creates en.json with found keys', function () {
@@ -38,6 +35,10 @@ it('preserves existing translations in en.json', function () {
 
 it('dry-run does not modify files', function () {
     $enPath = base_path('resources/lang/en.json');
+    File::put($enPath, json_encode([
+        'Hello World' => 'Hello World',
+    ], JSON_PRETTY_PRINT));
+
     $originalContent = File::get($enPath);
 
     $this->artisan('trans:scan', ['--dry-run' => true])
@@ -67,9 +68,6 @@ it('exports i18n file with --i18n option', function () {
     $content = File::get($fullPath);
     expect($content)->toContain('export default');
     expect($content)->toContain('{name}');
-
-    // Cleanup
-    unlink($fullPath);
 });
 
 it('extracts keys from PHP files', function () {

@@ -2,12 +2,9 @@
 
 use Illuminate\Support\Facades\File;
 
-$originalEnContent = file_get_contents(dirname(__DIR__, 2).'/workbench/resources/lang/en.json');
-$originalEsContent = file_get_contents(dirname(__DIR__, 2).'/workbench/resources/lang/es.json');
-
-afterEach(function () use ($originalEnContent, $originalEsContent) {
-    File::put(base_path('resources/lang/en.json'), $originalEnContent);
-    File::put(base_path('resources/lang/es.json'), $originalEsContent);
+afterEach(function () {
+    @unlink(base_path('resources/lang/en.json'));
+    @unlink(base_path('resources/lang/es.json'));
     @unlink(base_path('resources/lang/translations.csv'));
 });
 

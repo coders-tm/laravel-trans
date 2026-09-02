@@ -2,12 +2,10 @@
 
 use Illuminate\Support\Facades\File;
 
-$originalEnContent = file_get_contents(dirname(__DIR__, 2).'/workbench/resources/lang/en.json');
-$originalEsContent = file_get_contents(dirname(__DIR__, 2).'/workbench/resources/lang/es.json');
-
-afterEach(function () use ($originalEnContent, $originalEsContent) {
-    File::put(base_path('resources/lang/en.json'), $originalEnContent);
-    File::put(base_path('resources/lang/es.json'), $originalEsContent);
+afterEach(function () {
+    foreach (glob(base_path('resources/lang/*.json')) as $file) {
+        @unlink($file);
+    }
 });
 
 it('removes unused keys from en.json', function () {
@@ -44,14 +42,14 @@ it('dry-run does not modify files', function () {
 
 it('cleans other locale files too', function () {
     $enPath = base_path('resources/lang/en.json');
-    $esPath = base_path('resources/lang/es.json');
+    $xxPath = base_path('resources/lang/xx.json');
 
     File::put($enPath, json_encode([
         'Hello World' => 'Hello World',
         'Unused Key' => 'Unused Key',
     ], JSON_PRETTY_PRINT));
 
-    File::put($esPath, json_encode([
+    File::put($xxPath, json_encode([
         'Hello World' => 'Hola Mundo',
         'Unused Key' => 'Clave No Usada',
     ], JSON_PRETTY_PRINT));
@@ -60,9 +58,9 @@ it('cleans other locale files too', function () {
         ->expectsConfirmation('Are you sure you want to delete these keys? This will update your language files.', 'yes')
         ->assertExitCode(0);
 
-    $esTranslations = json_decode(File::get($esPath), true);
-    expect($esTranslations)->toHaveKey('Hello World');
-    expect($esTranslations)->not->toHaveKey('Unused Key');
+    $xxTranslations = json_decode(File::get($xxPath), true);
+    expect($xxTranslations)->toHaveKey('Hello World');
+    expect($xxTranslations)->not->toHaveKey('Unused Key');
 });
 
 it('keeps all keys when everything is used', function () {

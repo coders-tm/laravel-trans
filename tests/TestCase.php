@@ -21,6 +21,8 @@ abstract class TestCase extends BaseTestCase
         if (! file_exists($this->tempPath)) {
             mkdir($this->tempPath, 0755, true);
         }
+
+        $this->breakSymlinks();
     }
 
     protected function tearDown(): void
@@ -40,6 +42,31 @@ abstract class TestCase extends BaseTestCase
     protected function getPackageProviders($app): array
     {
         return [LaravelTransServiceProvider::class];
+    }
+
+    protected function breakSymlinks(): void
+    {
+        $symlinkedDirs = ['resources/lang', 'resources/views', 'resources/js'];
+
+        foreach ($symlinkedDirs as $relativePath) {
+            $path = base_path($relativePath);
+
+            if (! is_link($path)) {
+                continue;
+            }
+
+            $target = readlink($path);
+            $files = glob($target.'/*') ?: [];
+
+            unlink($path);
+            mkdir($path, 0755, true);
+
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    copy($file, $path.'/'.basename($file));
+                }
+            }
+        }
     }
 
     protected function deleteDirectory(string $directory): void
