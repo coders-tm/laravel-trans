@@ -20,6 +20,7 @@ workbench:
       reverse: true
     - from: workbench/resources/lang
       to: resources/lang
+      reverse: true
     - from: workbench/resources/views
       to: resources/views
     - from: workbench/resources/js

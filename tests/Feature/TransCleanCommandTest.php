@@ -2,20 +2,12 @@
 
 use Illuminate\Support\Facades\File;
 
-$originalEn = [
-    'Accept' => 'Accept',
-    'Hello :name' => 'Hello :name',
-    ':app_name © :year All Rights Reserved' => ':app_name © :year All Rights Reserved',
-];
+$originalEnContent = file_get_contents(dirname(__DIR__, 2).'/workbench/resources/lang/en.json');
+$originalEsContent = file_get_contents(dirname(__DIR__, 2).'/workbench/resources/lang/es.json');
 
-$originalEs = [
-    'Accept' => 'Aceptar',
-    'Hello :name' => 'Hola :name',
-];
-
-afterEach(function () use ($originalEn, $originalEs) {
-    File::put(base_path('resources/lang/en.json'), json_encode($originalEn, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    File::put(base_path('resources/lang/es.json'), json_encode($originalEs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+afterEach(function () use ($originalEnContent, $originalEsContent) {
+    File::put(base_path('resources/lang/en.json'), $originalEnContent);
+    File::put(base_path('resources/lang/es.json'), $originalEsContent);
 });
 
 it('removes unused keys from en.json', function () {

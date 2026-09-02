@@ -3,14 +3,10 @@
 use Illuminate\Support\Facades\File;
 use Trans\Services\TransService;
 
-$originalEn = [
-    'Accept' => 'Accept',
-    'Hello :name' => 'Hello :name',
-    ':app_name © :year All Rights Reserved' => ':app_name © :year All Rights Reserved',
-];
+$originalEnContent = file_get_contents(dirname(__DIR__, 2).'/workbench/resources/lang/en.json');
 
-afterEach(function () use ($originalEn) {
-    File::put(base_path('resources/lang/en.json'), json_encode($originalEn, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+afterEach(function () use ($originalEnContent) {
+    File::put(base_path('resources/lang/en.json'), $originalEnContent);
     @unlink(storage_path('lang/en.json'));
 });
 
