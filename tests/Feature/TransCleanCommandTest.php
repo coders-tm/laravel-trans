@@ -2,88 +2,87 @@
 
 use Illuminate\Support\Facades\File;
 
-beforeEach(function () {
-    $this->langPath = base_path('resources/lang');
-    if (! file_exists($this->langPath)) {
-        mkdir($this->langPath, 0755, true);
-    }
-});
+$originalEn = [
+    'Accept' => 'Accept',
+    'Hello :name' => 'Hello :name',
+    ':app_name © :year All Rights Reserved' => ':app_name © :year All Rights Reserved',
+];
 
-afterEach(function () {
-    $enJson = $this->langPath.'/en.json';
-    if (file_exists($enJson)) {
-        unlink($enJson);
-    }
-    $esJson = $this->langPath.'/es.json';
-    if (file_exists($esJson)) {
-        unlink($esJson);
-    }
+$originalEs = [
+    'Accept' => 'Aceptar',
+    'Hello :name' => 'Hola :name',
+];
+
+afterEach(function () use ($originalEn, $originalEs) {
+    File::put(base_path('resources/lang/en.json'), json_encode($originalEn, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    File::put(base_path('resources/lang/es.json'), json_encode($originalEs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 });
 
 it('removes unused keys from en.json', function () {
-    File::put($this->langPath.'/en.json', json_encode([
-        'Used Key' => 'Used Value',
-        'Unused Key' => 'Unused Value',
+    $enPath = base_path('resources/lang/en.json');
+    File::put($enPath, json_encode([
+        'Hello World' => 'Hello World',
+        'Submit Form' => 'Submit Form',
+        'Unused Key' => 'Unused Key',
     ], JSON_PRETTY_PRINT));
-
-    // Create a file that only uses "Used Key"
-    file_put_contents($this->tempPath.'/test.blade.php', '<p>{{ __("Used Key") }}</p>');
 
     $this->artisan('trans:clean')
         ->expectsConfirmation('Are you sure you want to delete these keys? This will update your language files.', 'yes')
         ->assertExitCode(0);
 
-    $translations = json_decode(File::get($this->langPath.'/en.json'), true);
-    expect($translations)->toHaveKey('Used Key');
+    $translations = json_decode(File::get($enPath), true);
+    expect($translations)->toHaveKey('Hello World');
     expect($translations)->not->toHaveKey('Unused Key');
 });
 
 it('dry-run does not modify files', function () {
-    File::put($this->langPath.'/en.json', json_encode([
-        'Unused Key' => 'Unused Value',
+    $enPath = base_path('resources/lang/en.json');
+    File::put($enPath, json_encode([
+        'Hello World' => 'Hello World',
+        'Unused Key' => 'Unused Key',
     ], JSON_PRETTY_PRINT));
 
-    $originalContent = File::get($this->langPath.'/en.json');
+    $originalContent = File::get($enPath);
 
     $this->artisan('trans:clean', ['--dry-run' => true])
         ->assertExitCode(0);
 
-    expect(File::get($this->langPath.'/en.json'))->toBe($originalContent);
+    expect(File::get($enPath))->toBe($originalContent);
 });
 
 it('cleans other locale files too', function () {
-    File::put($this->langPath.'/en.json', json_encode([
-        'Used Key' => 'Used',
-        'Unused Key' => 'Unused',
+    $enPath = base_path('resources/lang/en.json');
+    $esPath = base_path('resources/lang/es.json');
+
+    File::put($enPath, json_encode([
+        'Hello World' => 'Hello World',
+        'Unused Key' => 'Unused Key',
     ], JSON_PRETTY_PRINT));
 
-    File::put($this->langPath.'/es.json', json_encode([
-        'Used Key' => 'Usado',
-        'Unused Key' => 'No usado',
+    File::put($esPath, json_encode([
+        'Hello World' => 'Hola Mundo',
+        'Unused Key' => 'Clave No Usada',
     ], JSON_PRETTY_PRINT));
-
-    file_put_contents($this->tempPath.'/test.blade.php', '<p>{{ __("Used Key") }}</p>');
 
     $this->artisan('trans:clean')
         ->expectsConfirmation('Are you sure you want to delete these keys? This will update your language files.', 'yes')
         ->assertExitCode(0);
 
-    $esTranslations = json_decode(File::get($this->langPath.'/es.json'), true);
-    expect($esTranslations)->toHaveKey('Used Key');
+    $esTranslations = json_decode(File::get($esPath), true);
+    expect($esTranslations)->toHaveKey('Hello World');
     expect($esTranslations)->not->toHaveKey('Unused Key');
 });
 
 it('keeps all keys when everything is used', function () {
-    File::put($this->langPath.'/en.json', json_encode([
-        'Key One' => 'Value 1',
-        'Key Two' => 'Value 2',
+    $enPath = base_path('resources/lang/en.json');
+    File::put($enPath, json_encode([
+        'Hello World' => 'Hello World',
+        'Submit Form' => 'Submit Form',
     ], JSON_PRETTY_PRINT));
-
-    file_put_contents($this->tempPath.'/test.blade.php', '<p>{{ __("Key One") }} {{ __("Key Two") }}</p>');
 
     $this->artisan('trans:clean')
         ->assertExitCode(0);
 
-    $translations = json_decode(File::get($this->langPath.'/en.json'), true);
-    expect($translations)->toHaveCount(2);
+    $translations = json_decode(File::get($enPath), true);
+    expect($translations)->toHaveKeys(['Hello World', 'Submit Form']);
 });

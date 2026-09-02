@@ -2,62 +2,52 @@
 
 use Illuminate\Support\Facades\File;
 
-beforeEach(function () {
-    $this->langPath = base_path('resources/lang');
-    if (! file_exists($this->langPath)) {
-        mkdir($this->langPath, 0755, true);
-    }
-});
+$originalEn = [
+    'Accept' => 'Accept',
+    'Hello :name' => 'Hello :name',
+    ':app_name © :year All Rights Reserved' => ':app_name © :year All Rights Reserved',
+];
 
-afterEach(function () {
-    $files = glob($this->langPath.'/*.json');
-    foreach ($files as $file) {
-        unlink($file);
-    }
-    $csvPath = $this->langPath.'/translations.csv';
-    if (file_exists($csvPath)) {
-        unlink($csvPath);
-    }
+$originalEs = [
+    'Accept' => 'Aceptar',
+    'Hello :name' => 'Hola :name',
+];
+
+afterEach(function () use ($originalEn, $originalEs) {
+    File::put(base_path('resources/lang/en.json'), json_encode($originalEn, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    File::put(base_path('resources/lang/es.json'), json_encode($originalEs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    @unlink(base_path('resources/lang/translations.csv'));
 });
 
 it('exports translations to CSV', function () {
-    File::put($this->langPath.'/en.json', json_encode([
-        'Hello' => 'Hello',
-        'Goodbye' => 'Goodbye',
-    ], JSON_PRETTY_PRINT));
-
-    File::put($this->langPath.'/es.json', json_encode([
-        'Hello' => 'Hola',
-        'Goodbye' => 'Adios',
-    ], JSON_PRETTY_PRINT));
-
     $this->artisan('trans:export-csv')
         ->assertExitCode(0);
 
-    $csvPath = $this->langPath.'/translations.csv';
+    $csvPath = base_path('resources/lang/translations.csv');
     expect(file_exists($csvPath))->toBeTrue();
 
     $content = File::get($csvPath);
     expect($content)->toContain('key,en,es');
-    expect($content)->toContain('Hello');
-    expect($content)->toContain('Goodbye');
+    expect($content)->toContain('Accept');
 });
 
 it('exports only en keys as master', function () {
-    File::put($this->langPath.'/en.json', json_encode([
+    File::put(base_path('resources/lang/en.json'), json_encode([
         'Only In En' => 'Only In En',
+        'In Both' => 'In Both',
     ], JSON_PRETTY_PRINT));
 
-    File::put($this->langPath.'/es.json', json_encode([
-        'Only In Es' => 'Solo en Es',
-        'Only In En' => 'Solo en Es',
+    File::put(base_path('resources/lang/es.json'), json_encode([
+        'In Both' => 'En Ambos',
+        'Only In Es' => 'Solo En Es',
     ], JSON_PRETTY_PRINT));
 
     $this->artisan('trans:export-csv')
         ->assertExitCode(0);
 
-    $csvPath = $this->langPath.'/translations.csv';
+    $csvPath = base_path('resources/lang/translations.csv');
     $content = File::get($csvPath);
     expect($content)->toContain('Only In En');
+    expect($content)->toContain('In Both');
     expect($content)->not->toContain('Only In Es');
 });

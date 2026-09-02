@@ -11,9 +11,7 @@ abstract class TestCase extends BaseTestCase
 {
     use RefreshDatabase;
 
-    protected string $tempPath;
-
-    protected ?FileFactory $fileFactory = null;
+    private string $tempPath;
 
     protected function setUp(): void
     {
@@ -23,17 +21,6 @@ abstract class TestCase extends BaseTestCase
         if (! file_exists($this->tempPath)) {
             mkdir($this->tempPath, 0755, true);
         }
-
-        // Set scan_dirs to point to our temp directory
-        config(['trans.scan_dirs' => [$this->tempPath]]);
-        config(['trans.scan_js_dirs' => [$this->tempPath]]);
-
-        $this->fileFactory = new FileFactory($this->tempPath);
-    }
-
-    protected function factory(): FileFactory
-    {
-        return $this->fileFactory;
     }
 
     protected function tearDown(): void
@@ -45,21 +32,14 @@ abstract class TestCase extends BaseTestCase
         parent::tearDown();
     }
 
+    protected function factory(): FileFactory
+    {
+        return new FileFactory($this->tempPath);
+    }
+
     protected function getPackageProviders($app): array
     {
         return [LaravelTransServiceProvider::class];
-    }
-
-    protected function createTempFile(string $relativePath, string $content): string
-    {
-        $fullPath = $this->tempPath.'/'.$relativePath;
-        $dir = dirname($fullPath);
-        if (! file_exists($dir)) {
-            mkdir($dir, 0755, true);
-        }
-        file_put_contents($fullPath, $content);
-
-        return $fullPath;
     }
 
     protected function deleteDirectory(string $directory): void

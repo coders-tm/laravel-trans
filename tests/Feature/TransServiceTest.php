@@ -3,6 +3,17 @@
 use Illuminate\Support\Facades\File;
 use Trans\Services\TransService;
 
+$originalEn = [
+    'Accept' => 'Accept',
+    'Hello :name' => 'Hello :name',
+    ':app_name © :year All Rights Reserved' => ':app_name © :year All Rights Reserved',
+];
+
+afterEach(function () use ($originalEn) {
+    File::put(base_path('resources/lang/en.json'), json_encode($originalEn, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    @unlink(storage_path('lang/en.json'));
+});
+
 it('initializes with correct locale', function () {
     $service = new TransService('en', 'en');
 
@@ -41,9 +52,6 @@ it('returns the key itself when translation not found', function () {
 
 it('checks key existence via has', function () {
     $service = new TransService('en', 'en');
-
-    dump('has Accept:', $service->has('Accept'));
-    dump('translations keys:', array_keys($service->all()));
 
     expect($service->has('Accept'))->toBeTrue();
     expect($service->has('non.existent.key'))->toBeFalse();
@@ -119,9 +127,6 @@ it('stores translations via update', function () {
     expect(File::exists($storagePath))->toBeTrue();
     $stored = json_decode(File::get($storagePath), true);
     expect($stored)->toHaveKey('New Key');
-
-    // Cleanup
-    @unlink($storagePath);
 });
 
 it('merges update with existing translations', function () {
@@ -137,10 +142,6 @@ it('merges update with existing translations', function () {
     expect($result)->toHaveKey('Key B');
     expect($result['Key A'])->toBe('Value A');
     expect($result['Key B'])->toBe('Value B');
-
-    // Cleanup
-    $storagePath = config('trans.storage_path', storage_path('lang')).'/en.json';
-    @unlink($storagePath);
 });
 
 it('filters null values in update', function () {
@@ -153,10 +154,6 @@ it('filters null values in update', function () {
 
     expect($result)->toHaveKey('Keep Me');
     expect($result)->not->toHaveKey('Remove Me');
-
-    // Cleanup
-    $storagePath = config('trans.storage_path', storage_path('lang')).'/en.json';
-    @unlink($storagePath);
 });
 
 it('reloads translations after update', function () {
@@ -167,10 +164,6 @@ it('reloads translations after update', function () {
     $service->update('en', ['Fresh Key' => 'Fresh Value']);
 
     expect($service->has('Fresh Key'))->toBeTrue();
-
-    // Cleanup
-    $storagePath = config('trans.storage_path', storage_path('lang')).'/en.json';
-    @unlink($storagePath);
 });
 
 it('sorts keys alphabetically after update', function () {
@@ -188,8 +181,4 @@ it('sorts keys alphabetically after update', function () {
     $alphaIndex = array_search('Alpha', $keys);
     $zebraIndex = array_search('Zebra', $keys);
     expect($alphaIndex)->toBeLessThan($zebraIndex);
-
-    // Cleanup
-    $storagePath = config('trans.storage_path', storage_path('lang')).'/en.json';
-    @unlink($storagePath);
 });
