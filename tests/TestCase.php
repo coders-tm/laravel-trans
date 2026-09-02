@@ -29,6 +29,28 @@ abstract class TestCase extends BaseTestCase
         config(['trans.scan_js_dirs' => [$this->tempPath]]);
 
         $this->fileFactory = new FileFactory($this->tempPath);
+
+        // Create test lang files for TransService tests
+        $this->createLangFile('en', [
+            'Accept' => 'Accept',
+            'Hello :name' => 'Hello :name',
+            ':app_name © :year All Rights Reserved' => ':app_name © :year All Rights Reserved',
+        ]);
+        $this->createLangFile('es', [
+            'Accept' => 'Aceptar',
+        ]);
+
+        // Ensure storage/lang exists for TransService storage tests
+        $storageLang = storage_path('lang');
+        if (! file_exists($storageLang)) {
+            mkdir($storageLang, 0755, true);
+        }
+
+        // Clean up any leftover storage lang files from previous tests
+        $files = glob($storageLang.'/*.json');
+        foreach ($files as $file) {
+            @unlink($file);
+        }
     }
 
     protected function factory(): FileFactory
@@ -40,6 +62,15 @@ abstract class TestCase extends BaseTestCase
     {
         if (file_exists($this->tempPath)) {
             $this->deleteDirectory($this->tempPath);
+        }
+
+        // Clean up test storage lang files
+        $storageLang = storage_path('lang');
+        if (file_exists($storageLang)) {
+            $files = glob($storageLang.'/*.json');
+            foreach ($files as $file) {
+                @unlink($file);
+            }
         }
 
         parent::tearDown();

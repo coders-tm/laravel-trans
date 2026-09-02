@@ -19,7 +19,8 @@ class TransService
     /** @var string[]|null */
     private ?array $supportedLocales = null;
 
-    private static array $fileCache = [];
+    /** @var array<string, array> */
+    private array $fileCache = [];
 
     public function __construct(string $locale = 'en', string $fallbackLocale = 'en', ?string $langPath = null)
     {
@@ -52,7 +53,7 @@ class TransService
      *
      * @return string[]
      */
-    public function getSupportedLocales(): array
+    public function locales(): array
     {
         if ($this->supportedLocales === null) {
             $this->supportedLocales = $this->discoverLocales();
@@ -80,18 +81,18 @@ class TransService
 
         $cacheKey = $path.'_'.$lastModified;
 
-        if (isset(self::$fileCache[$cacheKey])) {
-            return self::$fileCache[$cacheKey];
+        if (isset($this->fileCache[$cacheKey])) {
+            return $this->fileCache[$cacheKey];
         }
 
         try {
             $content = File::get($path);
-            self::$fileCache[$cacheKey] = json_decode($content, true) ?? [];
+            $this->fileCache[$cacheKey] = json_decode($content, true) ?? [];
         } catch (\Throwable) {
-            self::$fileCache[$cacheKey] = [];
+            $this->fileCache[$cacheKey] = [];
         }
 
-        return self::$fileCache[$cacheKey];
+        return $this->fileCache[$cacheKey];
     }
 
     /**
@@ -127,11 +128,11 @@ class TransService
     }
 
     /**
-     * Get JSON translations formatted for the SPA frontend (converting placeholders).
+     * Get JSON translations formatted for i18n frontend libraries (converting placeholders).
      *
      * @return array<string, string>
      */
-    public function forFrontend(?string $locale = null): array
+    public function i18n(?string $locale = null): array
     {
         $locale = $locale ?? $this->locale;
         $merged = $this->merge($locale, true);
@@ -187,6 +188,35 @@ class TransService
         $locale = $locale ?? $this->locale;
 
         return $this->merge($locale, true);
+    }
+
+    /**
+     * Store or update translations for a locale.
+     *
+     * Merges the given translations into the existing storage file,
+     * filtering out null values and sorting keys alphabetically.
+     *
+     * @param  array<string, string|null>  $translations
+     * @return array<string, string>
+     */
+    public function update(string $locale, array $translations): array
+    {
+        $path = $this->storagePath.DIRECTORY_SEPARATOR.$locale.'.json';
+
+        $existing = [];
+        if (File::exists($path)) {
+            $existing = json_decode(File::get($path), true) ?? [];
+        }
+
+        $filtered = array_filter($translations, fn ($value) => $value !== null);
+        $merged = array_merge($existing, $filtered);
+        ksort($merged);
+
+        File::put($path, json_encode($merged, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        $this->load($locale);
+
+        return $merged;
     }
 
     /**

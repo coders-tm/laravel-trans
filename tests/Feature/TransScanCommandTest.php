@@ -50,13 +50,18 @@ it('preserves existing translations in en.json', function () {
 });
 
 it('dry-run does not modify files', function () {
+    // Get the existing en.json content before dry-run
+    $enPath = $this->langPath.'/en.json';
+    $originalContent = file_exists($enPath) ? file_get_contents($enPath) : null;
+
     $this->factory()->blade('test.blade.php', '<p>{{ __("Dry Run Key") }}</p>');
 
     $this->artisan('trans:scan', ['--dry-run' => true])
         ->assertExitCode(0);
 
-    $enPath = $this->langPath.'/en.json';
-    expect(file_exists($enPath))->toBeFalse();
+    if ($originalContent !== null) {
+        expect(file_get_contents($enPath))->toBe($originalContent);
+    }
 });
 
 it('normalizes placeholders in scanned keys', function () {
