@@ -23,6 +23,13 @@ abstract class TestCase extends BaseTestCase
         }
 
         $this->breakSymlinks();
+
+        foreach (['resources/lang', 'resources/views', 'resources/js'] as $dir) {
+            $path = base_path($dir);
+            if (! file_exists($path)) {
+                mkdir($path, 0755, true);
+            }
+        }
     }
 
     protected function tearDown(): void

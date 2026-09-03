@@ -2,7 +2,15 @@
 
 use Illuminate\Support\Facades\File;
 
+beforeEach(function () {
+    File::put(
+        base_path('resources/views/translations.blade.php'),
+        '<p>{{ __("Hello World") }}</p><button>{{ __("Submit Form") }}</button>'
+    );
+});
+
 afterEach(function () {
+    @unlink(base_path('resources/views/translations.blade.php'));
     foreach (glob(base_path('resources/lang/*.json')) as $file) {
         @unlink($file);
     }

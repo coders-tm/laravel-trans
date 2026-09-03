@@ -220,6 +220,10 @@ class TransService
         $merged = array_merge($existing, $filtered);
         ksort($merged);
 
+        if (! File::exists($this->storagePath)) {
+            File::makeDirectory($this->storagePath, 0755, true);
+        }
+
         File::put($path, json_encode($merged, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
         $this->load($locale);
