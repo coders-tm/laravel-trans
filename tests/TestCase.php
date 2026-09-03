@@ -3,9 +3,9 @@
 namespace Trans\Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Orchestra\Testbench\TestCase as BaseTestCase;
 use Trans\LaravelTransServiceProvider;
 use Trans\Tests\Helpers\FileFactory;
-use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
